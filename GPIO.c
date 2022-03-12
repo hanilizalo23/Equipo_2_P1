@@ -17,8 +17,12 @@
 #include "GPIO.h"
 #include "bits.h"
 
-static void (*gpio_C_callback)(void) = 0; /**Callback for the switch 2*/
-static void (*gpio_A_callback)(void) = 0; /**Callback for the switch 3*/
+static void (*gpio_A_callback)(void) = 0; /**Callback for the port A*/
+static void (*gpio_B_callback)(void) = 0; /**Callback for the port B*/
+static void (*gpio_C_callback)(void) = 0; /**Callback for the port C*/
+static void (*gpio_D_callback)(void) = 0; /**Callback for the port D*/
+static void (*gpio_E_callback)(void) = 0; /**Callback for the port E*/
+
 
 static volatile gpio_interrupt_flags_t g_intr_status_flag = {0}; /**Status of the interruption flag, struct*/
 
@@ -260,15 +264,7 @@ void GPIO_data_direction_pin(gpio_port_name_t port_name, uint8_t state, uint8_t 
 		}
 }
 
-void PORTC_IRQHandler(void) /**Verifies if the interrupt was from port C and calls the correspondent function*/
-{
-	if(gpio_C_callback)
-	{
-		gpio_C_callback();
-	}
-	GPIO_clear_interrupt(GPIO_C);
-
-}
+/**For interruptions and callbacks*/
 
 void PORTA_IRQHandler(void) /**Verifies if the interrupt was from port A and calls the correspondent function*/
 {
@@ -280,64 +276,160 @@ void PORTA_IRQHandler(void) /**Verifies if the interrupt was from port A and cal
 	GPIO_clear_interrupt(GPIO_A);
 }
 
+void PORTB_IRQHandler(void) /**Verifies if the interrupt was from port B and calls the correspondent function*/
+{
+	if(gpio_B_callback)
+	{
+		gpio_B_callback();
+	}
+
+	GPIO_clear_interrupt(GPIO_B);
+}
+
+void PORTC_IRQHandler(void) /**Verifies if the interrupt was from port C and calls the correspondent function*/
+{
+	if(gpio_C_callback)
+	{
+		gpio_C_callback();
+	}
+	GPIO_clear_interrupt(GPIO_C);
+
+}
+
+void PORTD_IRQHandler(void) /**Verifies if the interrupt was from port D and calls the correspondent function*/
+{
+	if(gpio_D_callback)
+	{
+		gpio_D_callback();
+	}
+
+	GPIO_clear_interrupt(GPIO_D);
+}
+
+void PORTE_IRQHandler(void) /**Verifies if the interrupt was from port E and calls the correspondent function*/
+{
+	if(gpio_E_callback)
+	{
+		gpio_E_callback();
+	}
+
+	GPIO_clear_interrupt(GPIO_E);
+}
+
 void GPIO_clear_interrupt(gpio_port_name_t port_name)
 {
-	switch(port_name)/** Selecting the GPIO for cleaning*/
+	switch(port_name) /**Selecting the GPIO for cleaning interruption*/
 	{
 		case GPIO_A: /** GPIO A is selected*/
 			PORTA->ISFR=0xFFFFFFFF;
-			break;
+		break;
+
 		case GPIO_B: /** GPIO B is selected*/
 			PORTB->ISFR=0xFFFFFFFF;
-			break;
+		break;
+
 		case GPIO_C: /** GPIO C is selected*/
 			PORTC->ISFR = 0xFFFFFFFF;
-			break;
+		break;
+
 		case GPIO_D: /** GPIO D is selected*/
 			PORTD->ISFR=0xFFFFFFFF;
-			break;
-		default: /** GPIO E is selected*/
+		break;
+
+		case GPIO_E: /** GPIO E is selected*/
 			PORTE->ISFR=0xFFFFFFFF;
-			break;
-	}// end switch
+		break;
+
+		default:
+		break;
+	}
 }
 
-void GPIO_callback_init(gpio_port_name_t port_name,void (*handler)(void)) /**Assigns the function to execute according to the port*/
+void GPIO_callback_init(gpio_port_name_t port_name,void (*handler)(void)) /**Initialization the callback of determined port*/
 {
-	if(GPIO_A == port_name)
+	switch(port_name) /**Selecting the GPIO*/
 	{
+		case GPIO_A: /** GPIO A is selected*/
 		gpio_A_callback = handler;
-	}
-	else
-	{
-		gpio_C_callback = handler;
+		break;
+
+		case GPIO_B: /** GPIO B is selected*/
+			gpio_B_callback = handler;
+		break;
+
+		case GPIO_C: /** GPIO C is selected*/
+			gpio_C_callback = handler;
+		break;
+
+		case GPIO_D: /** GPIO D is selected*/
+			gpio_D_callback = handler;
+		break;
+
+		case GPIO_E:  /** GPIO E is selected*/
+			gpio_E_callback = handler;
+		break;
+
+		default:
+		break;
 	}
 }
 
-void GPIO_clear_irq_status(gpio_port_name_t gpio) /**Cleans the flag of a determined port when the interruption is done*/
-{
-	if(GPIO_A == gpio)
-	{
-		g_intr_status_flag.flag_port_a = FALSE;
-	}
-	else
-	{
-		g_intr_status_flag.flag_port_c = FALSE;
-	}
-}
-
-uint8_t GPIO_get_irq_status(gpio_port_name_t gpio) /**Gets the status of the flag of a port*/
+uint8_t GPIO_get_irq_status(gpio_port_name_t port_name) /**Cleans the flag of a determined port when the interruption is done*/
 {
 	uint8_t status = 0;
-
-	if(GPIO_A == gpio)
+	switch(port_name) /**Selecting the GPIO*/
 	{
-		status = g_intr_status_flag.flag_port_a;
-	}
-	else
-	{
-		status = g_intr_status_flag.flag_port_c;
-	}
+		case GPIO_A: /** GPIO A is selected*/
+			status = g_intr_status_flag.flag_port_a;
+		break;
 
+		case GPIO_B: /** GPIO B is selected*/
+			status = g_intr_status_flag.flag_port_b;
+		break;
+
+		case GPIO_C: /** GPIO C is selected*/
+			status = g_intr_status_flag.flag_port_c;
+		break;
+
+		case GPIO_D: /** GPIO D is selected*/
+			status = g_intr_status_flag.flag_port_d;
+		break;
+
+		case GPIO_E:  /** GPIO E is selected*/
+			status = g_intr_status_flag.flag_port_e;
+		break;
+
+		default:
+		break;
+	}
 	return(status);
+}
+
+void GPIO_clear_irq_status(gpio_port_name_t port_name) /**Cleans the flag of the port status*/
+{
+	switch(port_name) /**Selecting the GPIO*/
+	{
+		case GPIO_A: /** GPIO A is selected*/
+			g_intr_status_flag.flag_port_a = FALSE;
+		break;
+
+		case GPIO_B: /** GPIO B is selected*/
+			g_intr_status_flag.flag_port_b = FALSE;
+		break;
+
+		case GPIO_C: /** GPIO C is selected*/
+			g_intr_status_flag.flag_port_c = FALSE;
+		break;
+
+		case GPIO_D: /** GPIO D is selected*/
+			g_intr_status_flag.flag_port_d = FALSE;
+		break;
+
+		case GPIO_E:  /** GPIO E is selected*/
+			g_intr_status_flag.flag_port_e = FALSE;
+		break;
+
+		default:
+		break;
+	}
 }

@@ -1,7 +1,6 @@
 /**
 	\file
-	\brief
-			This is the source file for the colors needed in the main implementation.
+	\brief This is the source file for the colors needed in the main implementation.
 	\author Nelida Paulina Hernández Moya
 	\date	15/02/2022
  */
@@ -9,25 +8,20 @@
 #ifndef RGB_H_
 #define RGB_H_
 
-/**Setters for the sequence and color*/
-void SW2_cb(void);
-void SW3_cb(void);
+void rgb_init(void); /**Helps to do all the initialization of the GPIOs that corresponds to the RGB LED*/
 
-/**Function that is called from callback for the functioning of the PIT*/
-void PIT_cb(void);
+void red_on(void); /**Turn on the red LED*/
+void blue_on(void); /**Turn on the blue LED*/
+void green_on(void); /**Turn on the green LED*/
+void purple_on(void); /**Turn on the purple LED*/
+void yellow_on(void); /**Turn on the yellow LED*/
+void white_on(void); /**Turn on the white LED*/
 
-/**Getters for the sequence and color*/
-uint8_t get_sequence(void);
-uint8_t get_color(void);
-
-void green(void); 	/**Function that turn on the green LED, waiting and turning it off*/
-void blue(void); 	/**Function that turn on the blue LED, waiting and turning it off*/
-void purple(void);	/**Function that turn on the purple LED, waiting and turning it off*/
-void red(void);		/**Function that turn on the red LED, waiting and turning it off*/
-void yellow(void);	/**Function that turn on the yellow LED, waiting and turning it off*/
-void white(void);   /**Function that turn on the white LED, waiting and turning it off*/
-void no_color(void); /**Functions that doesn't turn on anything**/
-
-
+void red_off(void); /**Turn off the red LED*/
+void blue_off(void); /**Turn off the blue LED*/
+void green_off(void); /**Turn off the green LED*/
+void purple_off(void); /**Turn off the purple LED*/
+void yellow_off(void); /**Turn off the yellow LED*/
+void white_off(void); /**Turn off the white LED*/
 
 #endif /* RGB_H_ */
