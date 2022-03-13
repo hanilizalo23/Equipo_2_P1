@@ -51,8 +51,16 @@ static const state_t SM[4]=
 /**Variables for the state machine and the frequencies of every signal*/
 static const state_t* current_state = NONE;
 static uint8_t input = NOTHING;
+static uint8_t g_counter_for_more_freq = NOTHING;
+static uint8_t g_state_freq5 = TRUE;
+static uint8_t g_state_freq15 = FALSE;
+static uint8_t g_state_freq10 = FALSE;
+static uint8_t g_allow_square = FALSE;
+static uint8_t square_value = 2;
 static My_float_pit_t g_current_period = DELAY_FOR_15HZ;
 static uint16_t *g_ptr_signals = sin_values;
+static My_float_pit_t g_current_period_aux = DELAY_FOR_15HZ;
+static base_time_t g_base_time = freq5;
 
 void signal_generator_init (void)
 {
@@ -139,9 +147,12 @@ void turn_triangle(void)
 	g_ptr_signals = triangle_values;
 }
 
-void send_square(My_float_pit_t modified_period)
+void turn_square(My_float_pit_t modified_period)
 {
-
+	if( ((DELAY_FOR_5HZ + DELAY) >= modified_period) && ((DELAY_FOR_5HZ - DELAY) <= modified_period))
+	{
+		PIT_delay(PIT_0, SYSTEM_CLOCK, modified_period);
+	}
 }
 
 void start_sin(void)
@@ -164,7 +175,22 @@ void start_triangle(void)
 
 void start_square(void)
 {
-
+	if(FALSE == g_state_freq10)
+	{
+		if(square_value == g_allow_square)
+		{
+			GPIO_toogle_pin(GPIO_C, bit_3);
+			g_allow_square = NOTHING;
+		}
+		else
+		{
+			g_allow_square++;
+		}
+	}
+	else
+	{
+		GPIO_toogle_pin(GPIO_C, bit_3);
+	}
 }
 
 void pause(void)
@@ -179,10 +205,88 @@ void signal_gen(void)
 
 void dac_out (void)
 {
+	switch(g_base_time)
+	{
+		case freq5:
+			g_state_freq10 = FALSE;
+			g_state_freq15 = FALSE;
+			g_counter_for_more_freq++;
+			if(DIF_FREQ == g_counter_for_more_freq)
+			{
+				if((ARRAYS_LENGTH - 1) == g_cycle_counter)
+				{
+					g_cycle_counter = 0;
+				}
+				DAC_SetBufferValue(DEMO_DAC_BASEADDR, 0U, g_ptr_signals[g_cycle_counter]);
+				g_state_freq5 = TRUE;
+				g_counter_for_more_freq = 0;
+				g_cycle_counter++;
+			}
+		break;
 
+		case freq10:
+			g_state_freq10 = TRUE;
+			if(FALSE == g_state_freq15)
+			{
+				g_counter_for_more_freq++;
+				if(DIF_FREQ == g_counter_for_more_freq)
+				{
+					if((ARRAYS_LENGTH - 1) == g_cycle_counter)
+					{
+						g_cycle_counter = 0;
+					}
+					DAC_SetBufferValue(DEMO_DAC_BASEADDR, 0U, g_ptr_signals[g_cycle_counter]);
+					g_counter_for_more_freq = 0;
+					g_cycle_counter++;
+				}
+			}
+			else
+			{
+				if((ARRAYS_LENGTH - 1) == g_cycle_counter)
+				{
+					g_cycle_counter = 0;
+				}
+				DAC_SetBufferValue(DEMO_DAC_BASEADDR, 0U, g_ptr_signals[g_cycle_counter]);
+				g_cycle_counter++;
+			}
+		break;
+
+		case freq15:
+			g_state_freq5 = FALSE;
+			g_state_freq10 = FALSE;
+			if((ARRAYS_LENGTH - 1) == g_cycle_counter)
+			{
+				g_cycle_counter = 0;
+			}
+			DAC_SetBufferValue(DEMO_DAC_BASEADDR, 0U, g_ptr_signals[g_cycle_counter]);
+			g_cycle_counter++;
+			g_state_freq15 = TRUE;
+		break;
+
+		default:
+		break;
+	}
+
+	g_current_period_aux = g_current_period;
 }
 
 void change_period (My_float_pit_t period)
 {
+	g_current_period = period;
 
+	if((DELAY_FOR_15HZ + DELAY) >= period)
+	{
+		g_base_time = freq15;
+	}
+	else if((DELAY_FOR_5HZ - DELAY) <= period)
+	{
+		g_base_time = freq5;
+		g_state_freq10 = FALSE;
+	}
+	else if(((DELAY_FOR_10HZ - DELAY) <= period) && (((DELAY_FOR_10HZ + DELAY) >= period)))
+	{
+		g_base_time = freq10;
+		g_state_freq10 = TRUE;
+		g_allow_square = NOTHING;
+	}
 }
