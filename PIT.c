@@ -203,6 +203,31 @@ void PIT_clear_interrupt(PIT_timer_t pit) /**Cleans the interruption of the PIT*
 		return;
 }
 
+void PIT_stop(PIT_timer_t pit_timer) /**Stops the counting of the PIT*/
+{
+	switch (pit_timer)
+	{
+		case PIT_0:
+			PIT->CHANNEL[0].TCTRL &= ~(PIT_TCTRL_TEN_MASK);
+		break;
+
+		case PIT_1:
+			PIT->CHANNEL[1].TCTRL &= ~(PIT_TCTRL_TEN_MASK);
+		break;
+
+		case PIT_2:
+			PIT->CHANNEL[2].TCTRL &= ~(PIT_TCTRL_TEN_MASK);
+		break;
+
+		case PIT_3:
+			PIT->CHANNEL[3].TCTRL &= ~(PIT_TCTRL_TEN_MASK);
+		break;
+
+		default:
+		break;
+	}
+}
+
 void PIT0_IRQHandler(void) /** ISR of the PIT_0*/
 {
 	if(PIT_0_callback)

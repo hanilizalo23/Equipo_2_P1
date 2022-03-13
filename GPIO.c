@@ -130,7 +130,7 @@ uint8_t GPIO_read_pin(gpio_port_name_t port_name, uint8_t pin)
 	switch(port_name) /**Reading and returning the value of a specific pin of the desired port*/
 		{
 		case GPIO_A:/** GPIO A is selected*/
-			delay(100000); /**Shouldn't*/
+			return (GPIOA->PDIR & 1<<pin);
 			break;
 		case GPIO_B:/** GPIO B is selected*/
 			return (GPIOB->PDIR & 1<<pin);

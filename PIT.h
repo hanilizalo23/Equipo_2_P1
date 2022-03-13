@@ -104,9 +104,18 @@ void PIT_callback_init(PIT_timer_t pit, void(*handler)(void));
        \brief      It clears the interrupt capabilities of the PIT
 
        \param[in]  The PIT.
-       \return uint8_t void
+       \return void
 */
 void PIT_clear_interrupt(PIT_timer_t pit);
+
+/********************************************************************************************/
+/*!
+       \brief      It stops the PIT
+
+       \param[in]  The PIT.
+       \return void
+*/
+void PIT_stop(PIT_timer_t pit_timer); /**Stops the counting of the PIT*/
 
 /********************************************************************************************/
 /*!
