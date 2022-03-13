@@ -24,4 +24,6 @@ void purple_off(void); /**Turn off the purple LED*/
 void yellow_off(void); /**Turn off the yellow LED*/
 void white_off(void); /**Turn off the white LED*/
 
+void rgb_basic_off(void); /**Turn off the three colors of the LED*/
+
 #endif /* RGB_H_ */
