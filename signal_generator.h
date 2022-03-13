@@ -11,6 +11,7 @@
 #include "PIT.h"
 
 #define ARRAYS_LENGTH		(200U)
+#define NOTHING             (0U)
 #define DELAY_FOR_15HZ		(0.066F)
 #define DELAY_FOR_10HZ		(0.1F)
 #define DELAY_FOR_5HZ		(0.2F)
@@ -65,5 +66,26 @@ static uint16_t sin_values[ARRAYS_LENGTH] = {
 		892U,  946U,  1001U, 1057U, 1114U, 1172U, 1231U, 1290U, 1351U, 1412U, 1474U, 1536U, 1599U, 1662U, 1726U,
 		1790U, 1854U, 1919U, 1983U, 2048U
 };
+
+static uint8_t g_cycle_counter = 0; /**Counting the cycles of the signal*/
+
+void signal_generator_init (void); /**Initialize DAC, PIT and RGB LED*/
+
+void turn_sin(void); /**Values for sin signal*/
+void turn_sawtooth(void); /**Values for sawtooth signal*/
+void turn_triangle(void); /**Values for triangle signal*/
+void turn_square(My_float_pit_t period_ss); /**Values for square signal with the required period*/
+
+void start_sin(void); /**Start the sinusoidal signal*/
+void start_sawtooth(void); /**Start the sinusoidal signal*/
+void start_triangle(void); /**Start the sinusoidal signal*/
+void start_square(void); /**Start the square signal*/
+
+void pause(void); /**Pause for the SM**/
+void dac_out (void); /**Setting DAC values*/
+void change_signal(uint8_t signal); /**Change the signal*/
+void change_period (My_float_pit_t period); /*Changing the period of the signal*/
+void change(void); /**Changes the configuration of every signal when changing the signal for itself*/
+void signal_gen(void); /**Helps the machine state to functioning*/
 
 #endif /* SIGNAL_GENERATOR_H_ */
