@@ -45,11 +45,11 @@ typedef enum {KEY_ZERO,
 }keys;
 
 void keypad_init(void); /**Initialize the pins of the keypad*/
-void change_column(void); /**Changing into columns*/
-void get_pressed_key(void); /**Gets the pressed key*/
-uint8_t read_pressed_key(void); /**Reads the pressed key*/
-uint32_t next_column(uint32_t col); /**Gives the next column*/
-uint8_t get_row(void); /**Gets the row*/
-void set_key(uint8_t key); /**Setting the key of the keypad*/
+void change_column(void); /**Changing into columns.*/
+void get_pressed_key(void); /**Gets the pressed key.*/
+uint8_t read_pressed_key(void); /**Reads the pressed key.*/
+uint32_t next_column(uint32_t col); /**Gives the next column.*/
+uint8_t get_row(void); /**Gets the row.*/
+void set_key(uint8_t key); /**Setting the key of the keypad.*/
 
 #endif /* KEYPAD_H_ */

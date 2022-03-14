@@ -264,12 +264,12 @@ void get_pressed_key(void) /**Returns in the global variable the value of the pr
 	g_key_pressed = FALSE;
 }
 
-uint8_t read_pressed_key(void) //*A getter for the pressed key*/
+uint8_t read_pressed_key(void) //*A getter for the pressed key.*/
 {
 	return g_key;
 }
 
-void set_key(uint8_t key) //*A setter for the key*/
+void set_key(uint8_t key) //*A setter for the key.*/
 {
 	g_key = key;
 }
