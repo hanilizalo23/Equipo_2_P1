@@ -4,7 +4,7 @@
  * @file    push buttons.c
  */
 
-#include "push_buttons.h"
+#include "push_buttons.h."
 #include "GPIO.h"
 #include "Bits.h"
 #include "NVIC.h"
@@ -17,11 +17,11 @@
 #define B1		(0x440U)
 #define SW2		(0xC00U)
 
-/**Pin control configuration of GPIOS for the buttons with passive filter to avoid rebounds*/
+/**Pin control configuration of GPIOS for the buttons with passive filter to avoid rebounds.*/
 gpio_pin_control_register_t pcr_gpioc_pin_10 = GPIO_MUX1 | GPIO_PE | GPIO_PS | GPIO_PFE | INTR_FALLING_EDGE;
 gpio_pin_control_register_t pcr_gpioc_pin_11 = GPIO_MUX1 | GPIO_PE | GPIO_PS | GPIO_PFE | INTR_FALLING_EDGE;
 
-/**Pin control configuration of GPIOS for the buttons of the K64 as pull ups*/
+/**Pin control configuration of GPIOS for the buttons of the K64 as pull ups.*/
 gpio_pin_control_register_t pcr_gpioa_pin_4 = GPIO_MUX1 | GPIO_PE | GPIO_PS | INTR_FALLING_EDGE;
 gpio_pin_control_register_t pcr_gpioc_pin_6 = GPIO_MUX1 | GPIO_PE | GPIO_PS | INTR_FALLING_EDGE;
 
