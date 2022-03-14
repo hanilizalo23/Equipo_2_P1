@@ -110,12 +110,21 @@ void PIT_clear_interrupt(PIT_timer_t pit);
 
 /********************************************************************************************/
 /*!
+       \brief      It starts the PIT
+
+       \param[in]  The PIT.
+       \return void
+*/
+void PIT_start(PIT_timer_t pit_timer);
+
+/********************************************************************************************/
+/*!
        \brief      It stops the PIT
 
        \param[in]  The PIT.
        \return void
 */
-void PIT_stop(PIT_timer_t pit_timer); /**Stops the counting of the PIT*/
+void PIT_stop(PIT_timer_t pit_timer);
 
 /********************************************************************************************/
 /*!

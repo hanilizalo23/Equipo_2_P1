@@ -108,7 +108,7 @@ void white_off(void) /**Turn off the white LED*/
 
 void rgb_basic_off(void) /**Turn off the three colors of the LED*/
 {
-	red_off();
-	blue_off();
 	green_off();
+	blue_off();
+	red_off();
 }

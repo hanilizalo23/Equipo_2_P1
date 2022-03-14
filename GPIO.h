@@ -224,7 +224,7 @@ void GPIO_clear_pin(gpio_port_name_t port_name, uint8_t pin);
  	 \param[in] pin Pin to be toggled.
  	 \return void
  */
-void GPIO_toogle_pin(gpio_port_name_t port_name, uint8_t pin);
+void GPIO_toggle_pin(gpio_port_name_t port_name, uint8_t pin);
 
 void PORTA_IRQHandler(void); /**Verifies if the interrupt was from port A and calls the correspondent function*/
 void PORTB_IRQHandler(void); /**Verifies if the interrupt was from port B and calls the correspondent function*/

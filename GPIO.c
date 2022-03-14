@@ -17,14 +17,16 @@
 #include "GPIO.h"
 #include "bits.h"
 
-static void (*gpio_A_callback)(void) = 0; /**Callback for the port A*/
-static void (*gpio_B_callback)(void) = 0; /**Callback for the port B*/
-static void (*gpio_C_callback)(void) = 0; /**Callback for the port C*/
-static void (*gpio_D_callback)(void) = 0; /**Callback for the port D*/
-static void (*gpio_E_callback)(void) = 0; /**Callback for the port E*/
+#define NOTHING 0U
+#define CLEAN_ISR 0xFFFFFFFF
 
+static void (*gpio_A_callback)(void) = NOTHING; /**Callback for the port A*/
+static void (*gpio_B_callback)(void) = NOTHING; /**Callback for the port B*/
+static void (*gpio_C_callback)(void) = NOTHING; /**Callback for the port C*/
+static void (*gpio_D_callback)(void) = NOTHING; /**Callback for the port D*/
+static void (*gpio_E_callback)(void) = NOTHING; /**Callback for the port E*/
 
-static volatile gpio_interrupt_flags_t g_intr_status_flag = {0}; /**Status of the interruption flag, struct*/
+static gpio_interrupt_flags_t g_intr_status_flag = {NOTHING};
 
 uint8_t GPIO_clock_gating(gpio_port_name_t port_name)
 {
@@ -83,19 +85,19 @@ void GPIO_write_port(gpio_port_name_t port_name, uint32_t data)
 	switch(port_name) /**Writing in the full port a value*/
 		{
 		case GPIO_A:/** GPIO A is selected*/
-			GPIOA->PDOR = data;
+			GPIOA->PDOR |= data;
 			break;
 		case GPIO_B:/** GPIO B is selected*/
-			GPIOB->PDOR = data;
+			GPIOB->PDOR |= data;
 			break;
 		case GPIO_C:/** GPIO C is selected*/
-			GPIOC->PDOR = data;
+			GPIOC->PDOR |= data;
 			break;
 		case GPIO_D:/** GPIO D is selected*/
-			GPIOD->PDOR = data;
+			GPIOD->PDOR |= data;
 			break;
 		case GPIO_E: /** GPIO E is selected*/
-			GPIOE->PDOR = data;
+			GPIOE->PDOR |= data;
 		default:/**If doesn't exist the option do nothing*/
 		break;
 		}
@@ -125,28 +127,39 @@ uint32_t GPIO_read_port(gpio_port_name_t port_name)
 	return 0;
 }
 
-uint8_t GPIO_read_pin(gpio_port_name_t port_name, uint8_t pin)
+uint8_t GPIO_read_pin(gpio_port_name_t port_name, uint8_t pin) /**Reading and returning the value of a specific pin of the desired port*/
 {
-	switch(port_name) /**Reading and returning the value of a specific pin of the desired port*/
-		{
-		case GPIO_A:/** GPIO A is selected*/
-			return (GPIOA->PDIR & 1<<pin);
-			break;
-		case GPIO_B:/** GPIO B is selected*/
-			return (GPIOB->PDIR & 1<<pin);
-			break;
-		case GPIO_C:/** GPIO C is selected*/
-			return (GPIOC->PDIR & 1<<pin);
-			break;
-		case GPIO_D:/** GPIO D is selected*/
-			return (GPIOD->PDIR & 1<<pin);
-			break;
-		case GPIO_E: /** GPIO E is selected*/
-			return (GPIOE->PDIR & 1<<pin);
-		default:/**If doesn't exist the option do nothing*/
+	uint32_t static read_pin = 0;
+	read_pin = 1 << pin;
+
+	switch(port_name) /**Selecting the GPIO*/
+	{
+		case GPIO_A:
+			read_pin &= GPIOA->PDIR; /** GPIO A is selected*/
 		break;
-		}
-	return 0;
+
+		case GPIO_B:
+			read_pin &= GPIOB->PDIR; /** GPIO B is selected*/
+		break;
+
+		case GPIO_C:
+			read_pin &= GPIOC->PDIR; /** GPIO C is selected*/
+		break;
+
+		case GPIO_D:
+			read_pin &= GPIOD->PDIR; /** GPIO D is selected*/
+		break;
+
+		case GPIO_E:
+			read_pin &= GPIOE->PDIR; /** GPIO E is selected*/
+		break;
+
+		default:
+			return(FALSE);
+	}
+
+	read_pin = (read_pin != NOTHING) ? TRUE:FALSE; /*If the pin reads something, returns 1, otherwise, returns 0*/
+	return((uint8_t) read_pin);
 }
 
 void GPIO_set_pin(gpio_port_name_t port_name, uint8_t pin)
@@ -154,19 +167,19 @@ void GPIO_set_pin(gpio_port_name_t port_name, uint8_t pin)
 	switch(port_name) /**Setting the correspondent pin of a port*/
 		{
 		case GPIO_A:/** GPIO A is selected*/
-			GPIOA->PSOR = 1<<pin;
+			GPIOA->PSOR |= BIT_ON << pin;
 			break;
 		case GPIO_B:/** GPIO B is selected*/
-			GPIOB->PSOR = 1<<pin;
+			GPIOB->PSOR |= BIT_ON << pin;
 			break;
 		case GPIO_C:/** GPIO C is selected*/
-			GPIOC->PSOR = 1<<pin;
+			GPIOC->PSOR |= BIT_ON << pin;
 			break;
 		case GPIO_D:/** GPIO D is selected*/
-			GPIOD->PSOR = 1<<pin;
+			GPIOD->PSOR |= BIT_ON << pin;
 			break;
 		case GPIO_E: /** GPIO E is selected*/
-			GPIOE->PSOR = 1<<pin;
+			GPIOE->PSOR |= BIT_ON << pin;
 		default:/**If doesn't exist the option do nothing*/
 		break;
 		}
@@ -174,45 +187,45 @@ void GPIO_set_pin(gpio_port_name_t port_name, uint8_t pin)
 
 void GPIO_clear_pin(gpio_port_name_t port_name, uint8_t pin)
 {
-	switch(port_name) /**Cleaning the correspondent pin of a port*/
+	switch(port_name) /**Setting the correspondent pin of a port*/
 		{
 		case GPIO_A:/** GPIO A is selected*/
-			GPIOA->PCOR = 1<<pin;
+			GPIOA->PCOR |= BIT_ON << pin;
 			break;
 		case GPIO_B:/** GPIO B is selected*/
-			GPIOB->PCOR = 1<<pin;
+			GPIOB->PCOR |= BIT_ON << pin;
 			break;
 		case GPIO_C:/** GPIO C is selected*/
-			GPIOC->PCOR = 1<<pin;
+			GPIOC->PCOR |= BIT_ON << pin;
 			break;
 		case GPIO_D:/** GPIO D is selected*/
-			GPIOD->PCOR = 1<<pin;
+			GPIOD->PCOR |= BIT_ON << pin;
 			break;
 		case GPIO_E: /** GPIO E is selected*/
-			GPIOE->PCOR = 1<<pin;
+			GPIOE->PCOR |= BIT_ON << pin;
 		default:/**If doesn't exist the option do nothing*/
 		break;
 		}
 }
 
-void GPIO_toogle_pin(gpio_port_name_t port_name, uint8_t pin)
+void GPIO_toggle_pin(gpio_port_name_t port_name, uint8_t pin)
 {
-	switch(port_name) /**Toggling the correspondent pin of a port*/
+	switch(port_name) /**Setting the correspondent pin of a port*/
 		{
 		case GPIO_A:/** GPIO A is selected*/
-			GPIOA->PTOR = 1<<pin;
+			GPIOA->PTOR ^= BIT_ON << pin;
 			break;
 		case GPIO_B:/** GPIO B is selected*/
-			GPIOB->PTOR = 1<<pin;
+			GPIOB->PTOR ^= BIT_ON << pin;
 			break;
 		case GPIO_C:/** GPIO C is selected*/
-			GPIOC->PTOR = 1<<pin;
+			GPIOC->PTOR ^= BIT_ON << pin;
 			break;
 		case GPIO_D:/** GPIO D is selected*/
-			GPIOD->PTOR = 1<<pin;
+			GPIOD->PTOR ^= BIT_ON << pin;
 			break;
 		case GPIO_E: /** GPIO E is selected*/
-			GPIOE->PTOR = 1<<pin;
+			GPIOE->PTOR ^= BIT_ON << pin;
 		default:/**If doesn't exist the option do nothing*/
 		break;
 		}
@@ -266,6 +279,124 @@ void GPIO_data_direction_pin(gpio_port_name_t port_name, uint8_t state, uint8_t 
 
 /**For interruptions and callbacks*/
 
+void GPIO_callback_init(gpio_port_name_t port_name,void (*handler)(void)) /**Initialization the callback of determined port*/
+{
+	switch(port_name) /**Selecting the GPIO*/
+	{
+		case GPIO_A: /** GPIO A is selected*/
+		gpio_A_callback = handler;
+		break;
+
+		case GPIO_B: /** GPIO B is selected*/
+			gpio_B_callback = handler;
+		break;
+
+		case GPIO_C: /** GPIO C is selected*/
+			gpio_C_callback = handler;
+		break;
+
+		case GPIO_D: /** GPIO D is selected*/
+			gpio_D_callback = handler;
+		break;
+
+		case GPIO_E:  /** GPIO E is selected*/
+			gpio_E_callback = handler;
+		break;
+
+		default:
+		break;
+	}
+}
+
+void GPIO_clear_irq_status(gpio_port_name_t port_name) /**Cleans the flag of the port status*/
+{
+	switch(port_name) /**Selecting the GPIO*/
+	{
+		case GPIO_A: /** GPIO A is selected*/
+			g_intr_status_flag.flag_port_a = FALSE;
+		break;
+
+		case GPIO_B: /** GPIO B is selected*/
+			g_intr_status_flag.flag_port_b = FALSE;
+		break;
+
+		case GPIO_C: /** GPIO C is selected*/
+			g_intr_status_flag.flag_port_c = FALSE;
+		break;
+
+		case GPIO_D: /** GPIO D is selected*/
+			g_intr_status_flag.flag_port_d = FALSE;
+		break;
+
+		case GPIO_E:  /** GPIO E is selected*/
+			g_intr_status_flag.flag_port_e = FALSE;
+		break;
+
+		default:
+		break;
+	}
+}
+
+uint8_t GPIO_get_irq_status(gpio_port_name_t port_name) /**Gets the flag of a determined port*/
+{
+	uint8_t status = 0;
+	switch(port_name) /**Selecting the GPIO*/
+	{
+		case GPIO_A: /** GPIO A is selected*/
+			status = g_intr_status_flag.flag_port_a;
+		break;
+
+		case GPIO_B: /** GPIO B is selected*/
+			status = g_intr_status_flag.flag_port_b;
+		break;
+
+		case GPIO_C: /** GPIO C is selected*/
+			status = g_intr_status_flag.flag_port_c;
+		break;
+
+		case GPIO_D: /** GPIO D is selected*/
+			status = g_intr_status_flag.flag_port_d;
+		break;
+
+		case GPIO_E:  /** GPIO E is selected*/
+			status = g_intr_status_flag.flag_port_e;
+		break;
+
+		default:
+		break;
+	}
+	return(status);
+}
+
+void GPIO_clear_interrupt(gpio_port_name_t port_name)
+{
+	switch(port_name) /**Selecting the GPIO for cleaning interruption*/
+	{
+		case GPIO_A: /** GPIO A is selected*/
+			PORTA->ISFR = CLEAN_ISR;
+		break;
+
+		case GPIO_B: /** GPIO B is selected*/
+			PORTB->ISFR = CLEAN_ISR;
+		break;
+
+		case GPIO_C: /** GPIO C is selected*/
+			PORTC->ISFR = CLEAN_ISR;
+		break;
+
+		case GPIO_D: /** GPIO D is selected*/
+			PORTD->ISFR = CLEAN_ISR;
+		break;
+
+		case GPIO_E: /** GPIO E is selected*/
+			PORTE->ISFR = CLEAN_ISR;
+		break;
+
+		default:
+		break;
+	}
+}
+
 void PORTA_IRQHandler(void) /**Verifies if the interrupt was from port A and calls the correspondent function*/
 {
 	if(gpio_A_callback)
@@ -314,122 +445,4 @@ void PORTE_IRQHandler(void) /**Verifies if the interrupt was from port E and cal
 	}
 
 	GPIO_clear_interrupt(GPIO_E);
-}
-
-void GPIO_clear_interrupt(gpio_port_name_t port_name)
-{
-	switch(port_name) /**Selecting the GPIO for cleaning interruption*/
-	{
-		case GPIO_A: /** GPIO A is selected*/
-			PORTA->ISFR=0xFFFFFFFF;
-		break;
-
-		case GPIO_B: /** GPIO B is selected*/
-			PORTB->ISFR=0xFFFFFFFF;
-		break;
-
-		case GPIO_C: /** GPIO C is selected*/
-			PORTC->ISFR = 0xFFFFFFFF;
-		break;
-
-		case GPIO_D: /** GPIO D is selected*/
-			PORTD->ISFR=0xFFFFFFFF;
-		break;
-
-		case GPIO_E: /** GPIO E is selected*/
-			PORTE->ISFR=0xFFFFFFFF;
-		break;
-
-		default:
-		break;
-	}
-}
-
-void GPIO_callback_init(gpio_port_name_t port_name,void (*handler)(void)) /**Initialization the callback of determined port*/
-{
-	switch(port_name) /**Selecting the GPIO*/
-	{
-		case GPIO_A: /** GPIO A is selected*/
-		gpio_A_callback = handler;
-		break;
-
-		case GPIO_B: /** GPIO B is selected*/
-			gpio_B_callback = handler;
-		break;
-
-		case GPIO_C: /** GPIO C is selected*/
-			gpio_C_callback = handler;
-		break;
-
-		case GPIO_D: /** GPIO D is selected*/
-			gpio_D_callback = handler;
-		break;
-
-		case GPIO_E:  /** GPIO E is selected*/
-			gpio_E_callback = handler;
-		break;
-
-		default:
-		break;
-	}
-}
-
-uint8_t GPIO_get_irq_status(gpio_port_name_t port_name) /**Cleans the flag of a determined port when the interruption is done*/
-{
-	uint8_t status = 0;
-	switch(port_name) /**Selecting the GPIO*/
-	{
-		case GPIO_A: /** GPIO A is selected*/
-			status = g_intr_status_flag.flag_port_a;
-		break;
-
-		case GPIO_B: /** GPIO B is selected*/
-			status = g_intr_status_flag.flag_port_b;
-		break;
-
-		case GPIO_C: /** GPIO C is selected*/
-			status = g_intr_status_flag.flag_port_c;
-		break;
-
-		case GPIO_D: /** GPIO D is selected*/
-			status = g_intr_status_flag.flag_port_d;
-		break;
-
-		case GPIO_E:  /** GPIO E is selected*/
-			status = g_intr_status_flag.flag_port_e;
-		break;
-
-		default:
-		break;
-	}
-	return(status);
-}
-
-void GPIO_clear_irq_status(gpio_port_name_t port_name) /**Cleans the flag of the port status*/
-{
-	switch(port_name) /**Selecting the GPIO*/
-	{
-		case GPIO_A: /** GPIO A is selected*/
-			g_intr_status_flag.flag_port_a = FALSE;
-		break;
-
-		case GPIO_B: /** GPIO B is selected*/
-			g_intr_status_flag.flag_port_b = FALSE;
-		break;
-
-		case GPIO_C: /** GPIO C is selected*/
-			g_intr_status_flag.flag_port_c = FALSE;
-		break;
-
-		case GPIO_D: /** GPIO D is selected*/
-			g_intr_status_flag.flag_port_d = FALSE;
-		break;
-
-		case GPIO_E:  /** GPIO E is selected*/
-			g_intr_status_flag.flag_port_e = FALSE;
-		break;
-
-		default:
-		break;
-	}
 }

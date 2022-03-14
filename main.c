@@ -18,7 +18,7 @@
 
 static uint8_t g_key = NO_KEY;
 
-typedef enum {INIT, PSWD, SQUARE, DAC, CHANGE_DAC_SIGNAL, CHANGE_FREC_SIGNAL, WAIT} main_states_t;
+typedef enum {INIT, PSWD, SQUARE, DAC, CHANGE_DAC_SIGNAL, CHANGE_FREC_SIGNAL, WAIT} main_states_t; /**States as variables for determine the next case, not a machine state*/
 
 int main(void) {
 
@@ -35,7 +35,7 @@ int main(void) {
 		{
 			switch(state_main)
 			{
-			case INIT:
+			case INIT: /**Case for initialize everything*/
 				signal_generator_init();
 				push_buttons_init();
 				keypad_init();
@@ -45,7 +45,7 @@ int main(void) {
 				state_main = PSWD;
 			break;
 
-			case PSWD:
+			case PSWD: /**Case for entering the password for DAC and TOGGLE*/
 				key = read_pressed_key();
 				if((NO_KEY != key) && (MAXLENGTH > count))
 				{
@@ -78,7 +78,7 @@ int main(void) {
 				}
 			break;
 
-			case SQUARE:
+			case SQUARE: /**Case for the square signal*/
 					if(MAXLENGTH == count)
 					{
 						rgb_basic_off();
@@ -109,7 +109,7 @@ int main(void) {
 			break;
 
 
-			case DAC:
+			case DAC: /**Case for the signals coming from DAC*/
 				if(MAXLENGTH == count)
 				{
 					rgb_basic_off();
@@ -139,10 +139,10 @@ int main(void) {
 				}
 			break;
 
-			case CHANGE_DAC_SIGNAL:
+			case CHANGE_DAC_SIGNAL: /**Handled by the correspondent API*/
 			break;
 
-			case CHANGE_FREC_SIGNAL:
+			case CHANGE_FREC_SIGNAL: /**Handled by the correspondent API*/
 			break;
 
 			default:
