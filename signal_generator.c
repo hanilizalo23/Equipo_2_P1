@@ -56,7 +56,7 @@ static uint8_t g_state_freq5 = TRUE;
 static uint8_t g_state_freq15 = FALSE;
 static uint8_t g_state_freq10 = FALSE;
 static uint8_t g_allow_square = FALSE;
-static uint8_t square_value = 2;
+static uint8_t square_value = 1;
 static My_float_pit_t g_current_period = DELAY_FOR_15HZ;
 static uint16_t *g_ptr_signals = sin_values;
 static My_float_pit_t g_current_period_aux = DELAY_FOR_15HZ;
@@ -97,7 +97,7 @@ void signal_generator_init (void)
 	PIT_delay(PIT_2, SYSTEM_CLOCK, g_current_period);
 }
 
-void change(void)
+void change(void) /*Changing the condition of signal for the machine state*/
 {
 	g_cycle_counter = NOTHING;
 	input = TRUE;
@@ -105,7 +105,7 @@ void change(void)
 	input = FALSE;
 }
 
-void change_signal(signal signal)
+void change_signal(signal signal) /**Changing the signal of the DAC*/
 {
 	pause();
 	switch(signal)
@@ -131,23 +131,23 @@ void change_signal(signal signal)
 	}
 }
 
-void turn_sin(void)
+void turn_sin(void) /**Changing to sinusoidal signal*/
 {
 	g_ptr_signals = sin_values;
 }
 
-void turn_sawtooth(void)
+void turn_sawtooth(void) /**Changing to sawtooth signal*/
 {
 	g_ptr_signals = sawtooth_values;
 }
 
 
-void turn_triangle(void)
+void turn_triangle(void) /**Changing to triangle signal*/
 {
 	g_ptr_signals = triangle_values;
 }
 
-void turn_square(My_float_pit_t modified_period)
+void turn_square(My_float_pit_t modified_period) /**Changing to square signal*/
 {
 	if( ((DELAY_FOR_5HZ + DELAY) >= modified_period) && ((DELAY_FOR_5HZ - DELAY) <= modified_period))
 	{
@@ -155,31 +155,31 @@ void turn_square(My_float_pit_t modified_period)
 	}
 }
 
-void start_sin(void)
+void start_sin(void) /**Starting to sinusoidal signal*/
 {
 	turn_sin();
 	PIT_delay(PIT_2, SYSTEM_CLOCK, g_current_period);
 }
 
-void start_sawtooth(void)
+void start_sawtooth(void) /**Starting to sawtooth signal*/
 {
 	turn_sawtooth();
 	PIT_delay(PIT_2, SYSTEM_CLOCK, g_current_period);
 }
 
-void start_triangle(void)
+void start_triangle(void) /**Starting to triangle signal*/
 {
 	turn_triangle();
 	PIT_delay(PIT_2, SYSTEM_CLOCK, g_current_period);
 }
 
-void start_square(void)
+void start_square(void) /**Starting to square signal*/
 {
 	if(FALSE == g_state_freq10)
 	{
 		if(square_value == g_allow_square)
 		{
-			GPIO_toogle_pin(GPIO_C, bit_3);
+			GPIO_toggle_pin(GPIO_C, bit_3);
 			g_allow_square = NOTHING;
 		}
 		else
@@ -189,21 +189,21 @@ void start_square(void)
 	}
 	else
 	{
-		GPIO_toogle_pin(GPIO_C, bit_3);
+		GPIO_toggle_pin(GPIO_C, bit_3);
 	}
 }
 
-void pause(void)
+void pause(void) /**Pause for the PIT*/
 {
 	PIT_stop(PIT_2);
 }
 
-void signal_gen(void)
+void signal_gen(void) /*Changing the state of the SM*/
 {
 	change_signal(current_state->out);
 }
 
-void dac_out (void)
+void dac_out (void) /*Configuring the signal for the DAC, depending the frequency we need*/
 {
 	switch(g_base_time)
 	{
@@ -270,7 +270,7 @@ void dac_out (void)
 	g_current_period_aux = g_current_period;
 }
 
-void change_period (My_float_pit_t period)
+void change_period (My_float_pit_t period) /*Changing the period of the signals*/
 {
 	g_current_period = period;
 

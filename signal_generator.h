@@ -12,9 +12,9 @@
 
 #define ARRAYS_LENGTH		(200U)
 #define NOTHING             (0U)
-#define DELAY_FOR_15HZ		(0.066F)
-#define DELAY_FOR_10HZ		(0.1F)
-#define DELAY_FOR_5HZ		(0.2F)
+#define DELAY_FOR_15HZ		(0.002000F)
+#define DELAY_FOR_10HZ		(0.003830F)
+#define DELAY_FOR_5HZ		(0.2900F)
 
 typedef enum {no_signal, sawtooth, triangle, sin} signal;
 
