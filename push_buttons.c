@@ -4,7 +4,7 @@
  * @file    push buttons.c
  */
 
-#include "push_buttons.h."
+#include "push_buttons.h"
 #include "GPIO.h"
 #include "Bits.h"
 #include "NVIC.h"

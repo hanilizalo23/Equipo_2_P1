@@ -141,7 +141,6 @@ void turn_sawtooth(void) /**Changing to sawtooth signal*/
 	g_ptr_signals = sawtooth_values;
 }
 
-
 void turn_triangle(void) /**Changing to triangle signal*/
 {
 	g_ptr_signals = triangle_values;

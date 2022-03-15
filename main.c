@@ -29,8 +29,6 @@ int main(void) {
 	static uint8_t count = NOTHING;
 	static uint8_t key = NO_KEY;
 
-	while(1)
-	{
 		while (1)
 		{
 			switch(state_main)
@@ -151,4 +149,3 @@ int main(void) {
 			}
 		}
 	}
-}
